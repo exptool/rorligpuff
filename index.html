@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Skapa HTML-kod till rörlig puff</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            padding-top: 20px;
+        }
+        .container {
+            width: 60%;
+            text-align: left;
+        }
+        .text-field, .output-field {
+            width: 100%;
+            margin: 10px 0 5px 0; /* Mindre marginal ovanför knapparna */
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .text-field {
+            color: black;
+            background-color: white;
+        }
+        .output-field {
+            background-color: #ccc; /* Mörkare grå bakgrund */
+            color: black;
+            min-height: 100px;
+            resize: none;
+        }
+        button {
+            display: block;
+            padding: 8px 16px;
+            margin-top: 5px; /* Mindre marginal ovanför knapparna */
+            margin-bottom: 10px; /* Lägger till marginal under knapparna */
+            background-color: #DAA520;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #F0E68C;
+        }
+        label {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            font-size: 10px;
+            font-style: italic;
+            text-align: center;
+            margin-top: 50px; /* Lägger till utrymme för footern */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Skapa HTML-kod till rörlig puff</h1>
+        <label for="article-url">Länk till artikel</label>
+        <input type="text" id="article-url" class="text-field" placeholder="Klistra in urlen här">
+        
+        <label for="video-url">Länk till videoklipp</label>
+        <input type="text" id="video-url" class="text-field" placeholder="Klistra in urlen här">
+        
+        <label for="base-code">Använd denna textkod (kod från 2024-01-06)</label>
+        <textarea id="base-code" class="output-field">&lt;a href="LÄNK-TILL-ARTIKEL"&gt;
+&lt;video style="width:100%; aspect-ratio:16/9; display:block;" src="LÄNK-TILL-VIDEOKLIPP" autoplay loop muted playsinline&gt;&lt;/video&gt;
+&lt;/a&gt;</textarea>
+        
+        <button onclick="generateCode()">Generera Kod</button>
+        
+        <label for="output">Färdig html-kod</label>
+        <textarea id="output" class="output-field" placeholder="Här kommer färdiga koden"></textarea>
+        
+        <button onclick="copyCode()">Kopiera Kod</button>
+        
+        <div class="footer">
+            Skapad med hjälp av ChatGPT. Om du vill uppdatera med ny textkod, använd ChatGPT och be den uppdatera koden och generera en html-fil.
+        </div>
+    </div>
+
+    <script>
+        function generateCode() {
+            var articleUrl = document.getElementById('article-url').value;
+            var videoUrl = document.getElementById('video-url').value;
+            var baseCode = document.getElementById('base-code').value;
+
+            var finalCode = baseCode.replace('LÄNK-TILL-ARTIKEL', articleUrl).replace('LÄNK-TILL-VIDEOKLIPP', videoUrl);
+            document.getElementById('output').value = finalCode.trim();
+        }
+
+        function copyCode() {
+            var copyText = document.getElementById("output");
+            copyText.select();
+            document.execCommand("copy");
+        }
+    </script>
+</body>
+</html>

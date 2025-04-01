@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="sv">
 <head>
-<link rel="icon" href="favicon.png" type="image/png">
-    <title>Skapa HTML-kod till rörlig puff</title>
+    <meta charset="UTF-8">
+    <link rel="icon" href="https://exptool.github.io/rorligpuff/favicon.png" type="image/png">
+    <title>Skapa HTML-kod till rörlig puff – version 2.0</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -22,7 +23,7 @@
         }
         .text-field, .output-field {
             width: 100%;
-            margin: 10px 0 5px 0; /* Mindre marginal ovanför knapparna */
+            margin: 10px 0 5px 0;
             padding: 10px;
             border: none;
             border-radius: 4px;
@@ -33,7 +34,7 @@
             background-color: white;
         }
         .output-field {
-            background-color: #ccc; /* Mörkare grå bakgrund */
+            background-color: #ccc;
             color: black;
             min-height: 100px;
             resize: none;
@@ -41,8 +42,8 @@
         button {
             display: block;
             padding: 8px 16px;
-            margin-top: 5px; /* Mindre marginal ovanför knapparna */
-            margin-bottom: 10px; /* Lägger till marginal under knapparna */
+            margin-top: 5px;
+            margin-bottom: 10px;
             background-color: #DAA520;
             color: black;
             border: none;
@@ -60,26 +61,59 @@
         }
         h1 {
             font-size: 22px;
+            margin-bottom: 10px;
+        }
+        .subtext {
+            font-size: 14px;
             margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .subtext .highlight {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .subtext .small-italic {
+            font-size: 12px;
+            font-style: italic;
         }
         .footer {
             font-size: 10px;
             font-style: italic;
             text-align: center;
-            margin-top: 50px; /* Lägger till utrymme för footern */
+            margin-top: 50px;
+        }
+        .video-preview {
+            margin-top: 20px;
+            display: none;
+        }
+        .status {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 24px;
+            vertical-align: middle;
+        }
+        .status.success {
+            color: green;
+        }
+        .status.error {
+            color: red;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Skapa HTML-kod till rörlig puff</h1>
+        <h1>Skapa HTML-kod till rörlig puff – version 2.0</h1>
+        
         <label for="article-url">Länk till artikel</label>
         <input type="text" id="article-url" class="text-field" placeholder="Klistra in urlen här">
         
         <label for="video-url">Länk till videoklipp</label>
-        <input type="text" id="video-url" class="text-field" placeholder="Klistra in urlen här">
+        <div style="display: flex; align-items: center;">
+            <input type="text" id="video-url" class="text-field" placeholder="Klistra in urlen här" oninput="updateVideoPreview()" style="flex-grow: 1;">
+            <span id="video-status" class="status"></span>
+        </div>
         
-        <label for="base-code">Använd denna textkod (kod från 2024-03-28)</label>
+        <label for="base-code">Använd denna textkod (kod från 2024-11-29)</label>
         <textarea id="base-code" class="output-field">&lt;a href="LÄNK-TILL-ARTIKEL"&gt;
 &lt;video style="width:100%;min-width:10px;aspect-ratio:16/9;display:block;" src="LÄNK-TILL-VIDEOKLIPP" autoplay="" loop="" muted="" playsinline&gt;&lt;/video&gt;
 &lt;/a&gt;</textarea>
@@ -90,10 +124,20 @@
         <textarea id="output" class="output-field" placeholder="Här kommer färdiga koden"></textarea>
         
         <button onclick="copyCode()">Kopiera kod</button>
-        
+
+        <div class="subtext"><br>
+        	<span class="highlight">Tillagda funktioner • </span><span class="small-italic">Uppdaterad 2024-11-29</span><br>
+            <span class="highlight">• NYHET 1:</span> Klistra in en url en 720p eller 576p, den ändrar till 432p i den färdiga html-koden. Klistrar du in en url till 288p, så ändras den inte till 432p.<br>
+            <span class="highlight">• NYHET 2:</span> Förhandsvisning på videoklippet längst ned – både autostartar och loopar.<br>
+            <span class="highlight">• NYHET 3:</span> Du får en markering om urlen du klistrar in inte fungerar, likväl att den fungerar.
+        </div>
+
+        <div class="video-preview" id="video-preview">
+            <label id="video-preview-label">Förhandsvisning av rörliga puffen i 432p</label>
+            <video id="video-player" controls autoplay loop muted playsinline style="width:100%;min-width:10px;aspect-ratio:16/9;display:block;"></video>
+        </div>
         <div class="footer">
-            Skapad med hjälp av ChatGPT.
-            Om du vill uppdatera med ny textkod, ladda ned html-filen, ladda upp den i till ChatGPT och skicka det du vill ändra i koden och be den generera en ny html-fil. 
+            Skapad med hjälp av ChatGPT. Om du vill uppdatera med ny textkod, ladda ned html-filen, ladda upp den till ChatGPT och skicka det du vill ändra i koden och be den generera en ny html-fil.
         </div>
     </div>
 
@@ -103,7 +147,9 @@
             var videoUrl = document.getElementById('video-url').value;
             var baseCode = document.getElementById('base-code').value;
 
-            var finalCode = baseCode.replace('LÄNK-TILL-ARTIKEL', articleUrl).replace('LÄNK-TILL-VIDEOKLIPP', videoUrl);
+            var finalVideoUrl = processVideoUrl(videoUrl);
+
+            var finalCode = baseCode.replace('LÄNK-TILL-ARTIKEL', articleUrl).replace('LÄNK-TILL-VIDEOKLIPP', finalVideoUrl);
             document.getElementById('output').value = finalCode.trim();
         }
 
@@ -111,6 +157,56 @@
             var copyText = document.getElementById("output");
             copyText.select();
             document.execCommand("copy");
+        }
+
+        async function updateVideoPreview() {
+            var videoUrl = document.getElementById('video-url').value;
+            var finalVideoUrl = processVideoUrl(videoUrl);
+
+            var videoPlayer = document.getElementById('video-player');
+            var videoPreview = document.getElementById('video-preview');
+            var videoPreviewLabel = document.getElementById('video-preview-label');
+            var videoStatus = document.getElementById('video-status');
+
+            if (await urlExists(finalVideoUrl)) {
+                videoStatus.textContent = '✓';
+                videoStatus.className = 'status success';
+
+                videoPlayer.src = finalVideoUrl;
+                videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+                videoPreview.style.display = 'block';
+            } else {
+                videoStatus.textContent = '✗';
+                videoStatus.className = 'status error';
+                videoPreview.style.display = 'none';
+            }
+        }
+
+        function processVideoUrl(url) {
+            if (url.endsWith('_432p.mp4') || url.endsWith('_288p.mp4')) {
+                return url;
+            } else if (url.endsWith('_720p.mp4') || url.endsWith('_576p.mp4')) {
+                return url.replace(/(_720p|_576p)\.mp4$/, '_432p.mp4');
+            }
+            return url;
+        }
+
+        function isValidMp4Url(url) {
+            return /^https?:\/\/.*\.(mp4)$/.test(url);
+        }
+
+        async function urlExists(url) {
+            try {
+                let response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function getResolution(url) {
+            var match = url.match(/_(\d{3,4}p)\.mp4$/);
+            return match ? match[1] : '';
         }
     </script>
 </body>

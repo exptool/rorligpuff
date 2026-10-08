@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<!-- saved from url=(0037)https://exptool.github.io/rorligpuff/ -->
+<html lang="sv"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <link rel="icon" href="https://exptool.github.io/rorligpuff/favicon.png" type="image/png">
+    <title>Skapa HTML-kod till rörlig puff – version 2.5</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            padding-top: 20px;
+        }
+        .container {
+            width: 60%;
+            text-align: left;
+        }
+        .text-field, .output-field {
+            width: 100%;
+            margin: 10px 0 5px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .text-field {
+            color: black;
+            background-color: white;
+        }
+        .output-field {
+            background-color: #ccc;
+            color: black;
+            min-height: 100px;
+            resize: none;
+        }
+        button {
+            display: block;
+            padding: 8px 16px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            background-color: #DAA520;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #F0E68C;
+        }
+        label {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        .subtext {
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .subtext .highlight {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .subtext .small-italic {
+            font-size: 12px;
+            font-style: italic;
+        }
+        .footer {
+            font-size: 10px;
+            font-style: italic;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .video-preview {
+            margin-top: 20px;
+            display: none;
+        }
+        .status {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 24px;
+            vertical-align: middle;
+        }
+        .status.success {
+            color: green;
+        }
+        .status.error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Skapa HTML-kod till rörlig puff – version 2.5</h1>
+        
+        <label for="article-url">Länk till artikel</label>
+        <input type="text" id="article-url" class="text-field" placeholder="Klistra in urlen här">
+        
+        <label for="video-url">Länk till videoklipp</label>
+        <div style="display: flex; align-items: center;">
+            <input type="text" id="video-url" class="text-field" placeholder="Klistra in urlen här" oninput="updateVideoPreview()" style="flex-grow: 1;">
+            <span id="video-status" class="status"></span>
+        </div>
+        
+        <label for="base-code">Använd denna textkod (kod från 2025-04-01)</label>
+        <textarea id="base-code" class="output-field">&lt;a href="LÄNK-TILL-ARTIKEL"&gt;
+&lt;video style="width:100%;min-width:10px;aspect-ratio:16/9;display:block;" src="LÄNK-TILL-VIDEOKLIPP" autoplay="" loop="" muted="" playsinline&gt;&lt;/video&gt;
+&lt;/a&gt;</textarea>
+        
+        <button onclick="generateCode()">Generera kod</button>
+        
+        <label for="output">Färdig html-kod</label>
+        <textarea id="output" class="output-field" placeholder="Här kommer färdiga koden"></textarea>
+        
+        <button onclick="copyCode()">Kopiera kod</button>
+
+        <div class="subtext"><br>
+        	<span class="highlight">Tillagda funktioner • </span><span class="small-italic">Uppdaterad 2025-04-01</span><br>
+            <span class="highlight">• NYHET 1:</span> Klistra in en url en 1080p eller 720p, den ändrar till 480p i den färdiga html-koden. Klistrar du in en url till 240p eller 360p, ändras den inte.<br>
+            <span class="highlight">• </span> Förhandsvisning på videoklippet längst ned – både autostartar och loopar.<br>
+            <span class="highlight">• </span> Du får en markering om urlen du klistrar in inte fungerar, likväl att den fungerar.
+        </div>
+
+        <div class="video-preview" id="video-preview">
+            <label id="video-preview-label">Förhandsvisning av rörliga puffen i 480p</label>
+            <video id="video-player" controls="" autoplay="" loop="" muted="" playsinline="" style="width:100%;min-width:10px;aspect-ratio:16/9;display:block;"></video>
+        </div>
+        <div class="footer">
+            Skapad med hjälp av ChatGPT. Om du vill uppdatera med ny textkod, ladda ned html-filen, ladda upp den till ChatGPT och skicka det du vill ändra i koden och be den generera en ny html-fil. Du måste be Christoffer Kjellberg att uppdatera html-koden på GitHub, den har han skapat. Men verktyget fungerar att köra lokalt på datorn.
+        </div>
+    </div>
+
+    <script>
+        function generateCode() {
+            var articleUrl = document.getElementById('article-url').value;
+            var videoUrl = document.getElementById('video-url').value;
+            var baseCode = document.getElementById('base-code').value;
+
+            var finalVideoUrl = processVideoUrl(videoUrl);
+
+            var finalCode = baseCode.replace('LÄNK-TILL-ARTIKEL', articleUrl).replace('LÄNK-TILL-VIDEOKLIPP', finalVideoUrl);
+            document.getElementById('output').value = finalCode.trim();
+        }
+
+        function copyCode() {
+            var copyText = document.getElementById("output");
+            copyText.select();
+            document.execCommand("copy");
+        }
+
+        async function updateVideoPreview() {
+            var videoUrl = document.getElementById('video-url').value;
+            var finalVideoUrl = processVideoUrl(videoUrl);
+
+            var videoPlayer = document.getElementById('video-player');
+            var videoPreview = document.getElementById('video-preview');
+            var videoPreviewLabel = document.getElementById('video-preview-label');
+            var videoStatus = document.getElementById('video-status');
+
+            if (await urlExists(finalVideoUrl)) {
+                videoStatus.textContent = '✓';
+                videoStatus.className = 'status success';
+
+                
+if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    
+if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    
+if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    
+if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPlayer.src = finalVideoUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    let previewUrl = finalVideoUrl.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+    videoPlayer.src = previewUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else {
+    videoPlayer.src = finalVideoUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+}
+
+} else if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    let previewUrl = finalVideoUrl.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+    videoPlayer.src = previewUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else {
+    
+if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPlayer.src = finalVideoUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    let previewUrl = finalVideoUrl.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+    videoPlayer.src = previewUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else {
+    videoPlayer.src = finalVideoUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+}
+
+}
+
+} else if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    let previewUrl = finalVideoUrl.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+    videoPlayer.src = previewUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else {
+    
+if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    
+if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPlayer.src = finalVideoUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    let previewUrl = finalVideoUrl.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+    videoPlayer.src = previewUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else {
+    videoPlayer.src = finalVideoUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+}
+
+} else if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    let previewUrl = finalVideoUrl.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+    videoPlayer.src = previewUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else {
+    
+if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPlayer.src = finalVideoUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    let previewUrl = finalVideoUrl.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+    videoPlayer.src = previewUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+} else {
+    videoPlayer.src = finalVideoUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+}
+
+}
+
+}
+
+} else {
+    let previewUrl = finalVideoUrl.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+    videoPlayer.src = previewUrl;
+    
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+}
+
+                
+if (finalVideoUrl.endsWith('_720p.mp4') || finalVideoUrl.endsWith('_1080p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i 480p';
+} else if (finalVideoUrl.endsWith('_240p.mp4') || finalVideoUrl.endsWith('_360p.mp4')) {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen i ' + getResolution(finalVideoUrl);
+} else {
+    videoPreviewLabel.textContent = 'Förhandsvisning av rörliga puffen';
+}
+
+                videoPreview.style.display = 'block';
+            } else {
+                videoStatus.textContent = '✗';
+                videoStatus.className = 'status error';
+                videoPreview.style.display = 'none';
+            }
+        }
+
+        function processVideoUrl(url) {
+            
+if (url.endsWith('_480p.mp4') || url.endsWith('_240p.mp4')) {
+    return url;
+} else if (url.endsWith('_720p.mp4') || url.endsWith('_1080p.mp4')) {
+    return url.replace(/(_720p|_1080p)\.mp4$/, '_480p.mp4');
+} else {
+
+                return url.replace(/(_720p|_576p)\.mp4$/, '_480p.mp4');
+            }
+            return url;
+        }
+
+        function isValidMp4Url(url) {
+            return /^https?:\/\/.*\.(mp4)$/.test(url);
+        }
+
+        async function urlExists(url) {
+            try {
+                let response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function getResolution(url) {
+            var match = url.match(/_(\d{3,4}p)\.mp4$/);
+            return match ? match[1] : '';
+        }
+    </script>
+
+
+</body></html>
